@@ -88,3 +88,6 @@ Flags:
    - pc: [Trojan-Qt5](https://github.com/TheWanderingCoel/Trojan-Qt5)
    - ios: [shadowrocket](https://apps.apple.com/us/app/shadowrocket/id932747118)
    - android: [igniter](https://github.com/trojan-gfw/igniter)
+   
+更新apt-get,并安装 curl，若是有此环境，请跳过（Ubuntu/Debian）
+apt-get update -y && apt-get install curl -y
