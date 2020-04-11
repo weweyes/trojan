@@ -92,3 +92,7 @@ Flags:
 更新apt-get,并安装 curl，若是有此环境，请跳过（Ubuntu/Debian）
 
 apt-get update -y && apt-get install curl -y
+
+一键安装网络加速器
+
+wget -N --no-check-certificate https://raw.githubusercontent.com/wulimaxh/linux-netspeed/master/tcp.sh && chmod +x tcp.sh && ./tcp.sh
