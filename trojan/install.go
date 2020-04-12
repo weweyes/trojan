@@ -100,7 +100,7 @@ func InstallTls() {
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
-		core.WriterTls(crtFile, keyFile)
+		core.WriteTls(crtFile, keyFile)
 	} else if choice == 2 {
 		crtFile := util.Input("请输入证书的cert文件路径: ", "")
 		keyFile := util.Input("请输入证书的key文件路径: ", "")
@@ -112,7 +112,7 @@ func InstallTls() {
 				fmt.Println("输入域名为空!")
 				return
 			}
-			core.WriterTls(crtFile, keyFile)
+			core.WriteTls(crtFile, keyFile)
 		}
 	}
 	core.SetValue("domain", domain)
@@ -156,7 +156,7 @@ func InstallMysql() {
 		}
 		fmt.Println("mysql启动成功!")
 	} else if choice == 2 {
-		mysql = core.Mysql{Username: "root"}
+		mysql = core.Mysql{}
 		for {
 			for {
 				mysqlUrl := util.Input("请输入mysql连接地址(格式: host:port), 默认连接地址为127.0.0.1:3306, 使用直接回车, 否则输入自定义连接地址: ",
@@ -174,19 +174,20 @@ func InstallMysql() {
 				mysql.ServerAddr, mysql.ServerPort = urlInfo[0], port
 				break
 			}
-			mysql.Password = util.Input("请输入mysql root用户的密码: ", "")
+			mysql.Username = util.Input("请输入mysql的用户名(回车使用root): ", "root")
+			mysql.Password = util.Input(fmt.Sprintf("请输入mysql %s用户的密码: ", mysql.Username), "")
 			db := mysql.GetDB()
 			if db != nil && db.Ping() == nil {
-				db.Exec("CREATE DATABASE IF NOT EXISTS trojan;")
+				mysql.Database = util.Input("请输入使用的数据库名(不存在可自动创建, 回车使用trojan): ", "trojan")
+				db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Database))
 				break
 			} else {
 				fmt.Println("连接mysql失败, 请重新输入")
 			}
 		}
 	}
-	mysql.Database = "trojan"
 	mysql.CreateTable()
-	core.WriterMysql(&mysql)
+	core.WriteMysql(&mysql)
 	if len(mysql.GetData()) == 0 {
 		AddUser()
 	}

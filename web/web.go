@@ -43,6 +43,32 @@ func userRouter(router *gin.Engine) {
 	}
 }
 
+func trojanRouter(router *gin.Engine) {
+	router.POST("/trojan/start", func(c *gin.Context) {
+		c.JSON(200, controller.Start())
+	})
+	router.POST("/trojan/stop", func(c *gin.Context) {
+		c.JSON(200, controller.Stop())
+	})
+	router.POST("/trojan/restart", func(c *gin.Context) {
+		c.JSON(200, controller.Restart())
+	})
+	router.GET("/trojan/status", func(c *gin.Context) {
+		c.JSON(200, controller.Status())
+	})
+	router.POST("/trojan/update", func(c *gin.Context) {
+		c.JSON(200, controller.Update())
+	})
+	router.POST("/trojan/loglevel", func(c *gin.Context) {
+		slevel := c.DefaultPostForm("level", "1")
+		level, _ := strconv.Atoi(slevel)
+		c.JSON(200, controller.LogLevel(level))
+	})
+	router.GET("/trojan/log", func(c *gin.Context) {
+		controller.Log(c)
+	})
+}
+
 func dataRouter(router *gin.Engine) {
 	data := router.Group("/trojan/data")
 	{
@@ -93,6 +119,7 @@ func Start(port int, isSSL bool) {
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	staticRouter(router)
 	router.Use(Auth(router).MiddlewareFunc())
+	trojanRouter(router)
 	userRouter(router)
 	dataRouter(router)
 	commonRouter(router)
