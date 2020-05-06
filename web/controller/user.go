@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/base64"
+	"fmt"
 	"strconv"
 	"time"
 	"trojan/core"
@@ -32,6 +33,28 @@ func UserList(findUser string) *ResponseBody {
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
 		"userList": userList,
+	}
+	return &responseBody
+}
+
+// PageUserList 分页查询获取用户列表
+func PageUserList(curPage int, pageSize int) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	mysql := core.GetMysql()
+	pageData := mysql.PageList(curPage, pageSize)
+	if pageData == nil {
+		responseBody.Msg = "连接mysql失败!"
+		return &responseBody
+	}
+	domain, err := core.GetValue("domain")
+	if err != nil {
+		domain = ""
+	}
+	fmt.Printf("%+v\n", pageData)
+	responseBody.Data = map[string]interface{}{
+		"domain":   domain,
+		"pageData": pageData,
 	}
 	return &responseBody
 }
