@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/base64"
-	"fmt"
 	"strconv"
 	"time"
 	"trojan/core"
@@ -51,7 +50,6 @@ func PageUserList(curPage int, pageSize int) *ResponseBody {
 	if err != nil {
 		domain = ""
 	}
-	fmt.Printf("%+v\n", pageData)
 	responseBody.Data = map[string]interface{}{
 		"domain":   domain,
 		"pageData": pageData,
@@ -77,7 +75,7 @@ func CreateUser(username string, password string) *ResponseBody {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
 	}
-	if err := mysql.CreateUser(username, string(pass)); err != nil {
+	if err := mysql.CreateUser(username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
 	}
 	return &responseBody
@@ -111,7 +109,7 @@ func UpdateUser(id uint, username string, password string) *ResponseBody {
 		responseBody.Msg = "Base64解码失败: " + err.Error()
 		return &responseBody
 	}
-	if err := mysql.UpdateUser(id, username, string(pass)); err != nil {
+	if err := mysql.UpdateUser(id, username, password, string(pass)); err != nil {
 		responseBody.Msg = err.Error()
 	}
 	return &responseBody
