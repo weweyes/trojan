@@ -10,10 +10,12 @@ import (
 // WebMenu web管理菜单
 func WebMenu() {
 	fmt.Println()
-	menu := []string{"重置web管理员密码"}
+	menu := []string{"重置web管理员密码", "修改显示的域名(非申请证书)"}
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
 		ResetAdminPass()
+	case 2:
+		SetDomain("")
 	}
 }
 

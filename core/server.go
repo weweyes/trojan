@@ -83,10 +83,18 @@ func WriteMysql(mysql *Mysql) bool {
 }
 
 // WriteTls 写tls配置
-func WriteTls(cert string, key string) bool {
+func WriteTls(cert, key, domain string) bool {
 	config := Load("")
 	config.SSl.Cert = cert
 	config.SSl.Key = key
+	config.SSl.Sni = domain
+	return Save(config, "")
+}
+
+// WriteDomain 写域名
+func WriteDomain(domain string) bool {
+	config := Load("")
+	config.SSl.Sni = domain
 	return Save(config, "")
 }
 

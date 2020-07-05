@@ -33,6 +33,7 @@ func Version() *ResponseBody {
 		"gitVersion":    trojan.GitVersion,
 		"trojanVersion": trojan.Version(),
 		"trojanRuntime": trojan.RunTime(),
+		"trojanType":    trojan.Type(),
 	}
 	return &responseBody
 }
@@ -45,6 +46,26 @@ func SetLoginInfo(title string) *ResponseBody {
 	if err != nil {
 		responseBody.Msg = err.Error()
 	}
+	return &responseBody
+}
+
+// SetDomain 设置域名
+func SetDomain(domain string) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	trojan.SetDomain(domain)
+	return &responseBody
+}
+
+// SetTrojanType 设置trojan类型
+func SetTrojanType(tType string) *ResponseBody {
+	responseBody := ResponseBody{Msg: "success"}
+	defer TimeCost(time.Now(), &responseBody)
+	err := core.SetValue("trojanType", tType)
+	if err != nil {
+		responseBody.Msg = err.Error()
+	}
+	trojan.InstallTrojan()
 	return &responseBody
 }
 
