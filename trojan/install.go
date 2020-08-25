@@ -99,6 +99,7 @@ func InstallTls() {
 		if !util.IsExists("/root/.acme.sh/acme.sh") {
 			util.RunWebShell("https://get.acme.sh")
 		}
+		Stop()
 		util.OpenPort(80)
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
@@ -190,7 +191,7 @@ func InstallMysql() {
 	}
 	mysql.CreateTable()
 	core.WriteMysql(&mysql)
-	if len(mysql.GetData()) == 0 {
+	if userList, _ := mysql.GetData(); len(userList) == 0 {
 		AddUser()
 	}
 	Restart()
