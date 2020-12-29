@@ -129,7 +129,7 @@ func Log(line int) {
 
 // LogChan trojan实时日志, 返回chan
 func LogChan(param string, closeChan chan byte) (chan string, error) {
-	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan "+param)
+	cmd := exec.Command("bash", "-c", "journalctl -f -u trojan -o cat "+param)
 
 	stdout, _ := cmd.StdoutPipe()
 
@@ -151,24 +151,4 @@ func LogChan(param string, closeChan chan byte) (chan string, error) {
 		}
 	}()
 	return ch, nil
-}
-
-// SetDomain 设置显示的域名
-func SetDomain(domain string) {
-	if domain == "" {
-		domain = util.Input("请输入要显示的域名地址: ", "")
-	}
-	if domain == "" {
-		fmt.Println("撤销更改!")
-	} else {
-		core.WriteDomain(domain)
-		Restart()
-		fmt.Println("修改domain成功!")
-	}
-}
-
-// GetDomainAndPort 获取域名和端口
-func GetDomainAndPort() (string, int) {
-	config := core.Load("")
-	return config.SSl.Sni, config.LocalPort
 }
