@@ -75,6 +75,15 @@ func trojanRouter(router *gin.Engine) {
 	router.GET("/trojan/loglevel", func(c *gin.Context) {
 		c.JSON(200, controller.GetLogLevel())
 	})
+	router.GET("/trojan/export", func(c *gin.Context) {
+		result := controller.ExportCsv(c)
+		if result != nil {
+			c.JSON(200, result)
+		}
+	})
+	router.POST("/trojan/import", func(c *gin.Context) {
+		c.JSON(200, controller.ImportCsv(c))
+	})
 	router.POST("/trojan/update", func(c *gin.Context) {
 		c.JSON(200, controller.Update())
 	})
@@ -137,16 +146,12 @@ func commonRouter(router *gin.Engine) {
 }
 
 func staticRouter(router *gin.Engine) {
-	// 设置静态资源
 	staticFs, _ := fs.Sub(f, "templates/static")
 	router.StaticFS("/static", http.FS(staticFs))
 
 	router.GET("/", func(c *gin.Context) {
-		c.Writer.WriteHeader(http.StatusOK)
 		indexHTML, _ := f.ReadFile("templates/" + "index.html")
 		c.Writer.Write(indexHTML)
-		c.Writer.Header().Add("Accept", "text/html")
-		c.Writer.Flush()
 	})
 }
 
