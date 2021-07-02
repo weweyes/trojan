@@ -2,10 +2,12 @@ package trojan
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 	"trojan/core"
@@ -39,13 +41,15 @@ func ControllMenu() {
 		//阻塞
 		<-c
 	case 6:
-		_ = core.SetValue("trojanType", tType)
-		InstallTrojan()
+		if err := SwitchType(tType); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
 // Restart 重启trojan
 func Restart() {
+	util.OpenPort(core.GetConfig().LocalPort)
 	if err := util.ExecCommand("systemctl restart trojan"); err != nil {
 		fmt.Println(util.Red("重启trojan失败!"))
 	} else {
@@ -55,6 +59,7 @@ func Restart() {
 
 // Start 启动trojan
 func Start() {
+	util.OpenPort(core.GetConfig().LocalPort)
 	if err := util.ExecCommand("systemctl start trojan"); err != nil {
 		fmt.Println(util.Red("启动trojan失败!"))
 	} else {
@@ -103,6 +108,22 @@ func Version() string {
 	firstLine := strings.Split(result, "\n")[0]
 	tempSlice := strings.Split(firstLine, " ")
 	return tempSlice[len(tempSlice)-1]
+}
+
+// SwitchType 切换Trojan类型
+func SwitchType(tType string) error {
+	ARCH := runtime.GOARCH
+	if ARCH != "amd64" && ARCH != "arm64" {
+		return errors.New("not support " + ARCH + " machine")
+	}
+	if tType == "trojan" && ARCH != "amd64" {
+		return errors.New("trojan not support " + ARCH + " machine")
+	}
+	if err := core.SetValue("trojanType", tType); err != nil {
+		return err
+	}
+	InstallTrojan("")
+	return nil
 }
 
 // Type Trojan类型

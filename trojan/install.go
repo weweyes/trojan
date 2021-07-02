@@ -3,6 +3,7 @@ package trojan
 import (
 	"fmt"
 	"net"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -23,7 +24,7 @@ func InstallMenu() {
 	menu := []string{"更新trojan", "证书申请", "安装mysql"}
 	switch util.LoopInput("请选择: ", menu, true) {
 	case 1:
-		InstallTrojan()
+		InstallTrojan("")
 	case 2:
 		InstallTls()
 	case 3:
@@ -48,11 +49,15 @@ func InstallDocker() {
 }
 
 // InstallTrojan 安装trojan
-func InstallTrojan() {
+func InstallTrojan(version string) {
 	fmt.Println()
 	data := string(asset.GetAsset("trojan-install.sh"))
-	if util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service") != "" && Type() == "trojan-go" {
+	checkTrojan := util.ExecCommandWithResult("systemctl list-unit-files|grep trojan.service")
+	if (checkTrojan == "" && runtime.GOARCH != "amd64") || Type() == "trojan-go" {
 		data = strings.ReplaceAll(data, "TYPE=0", "TYPE=1")
+	}
+	if version != "" {
+		data = strings.ReplaceAll(data, "INSTALL_VERSION=\"\"", "INSTALL_VERSION=\""+version+"\"")
 	}
 	util.ExecCommand(data)
 	util.OpenPort(443)
@@ -97,6 +102,11 @@ func InstallTls() {
 		}
 		util.ExecCommand("systemctl stop trojan-web")
 		util.OpenPort(80)
+		checkResult := util.ExecCommandWithResult("/root/.acme.sh/acme.sh -v|tr -cd '[0-9]'")
+		acmeVersion, _ := strconv.Atoi(checkResult)
+		if acmeVersion >= 300 {
+			util.ExecCommand("/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt")
+		}
 		util.ExecCommand(fmt.Sprintf("bash /root/.acme.sh/acme.sh --issue -d %s --debug --standalone --keylength ec-256", domain))
 		crtFile := "/root/.acme.sh/" + domain + "_ecc" + "/fullchain.cer"
 		keyFile := "/root/.acme.sh/" + domain + "_ecc" + "/" + domain + ".key"
